@@ -2,7 +2,7 @@
 
 OpenClaw plugin that intercepts media-only inbound messages before they reach the LLM. If the channel provides readable local attachment paths, the plugin stages them through `obsidian-cli-plugins` so a later text message can create one Obsidian file-mode record with all staged media.
 
-This is an OpenClaw runtime plugin, not a general-purpose npm library. It depends on OpenClaw's `inbound_claim` typed hook and is useful only inside an OpenClaw plugin runtime that supports that hook.
+This is an OpenClaw runtime plugin, not a general-purpose npm library. It depends on OpenClaw typed hooks (`inbound_claim` and `before_dispatch`) and is useful only inside an OpenClaw plugin runtime that supports those hooks.
 
 ## Why
 
@@ -20,6 +20,7 @@ Without an early `inbound_claim` guard, each media-only event can be sent to the
 
 - Claims only media-only inbound messages.
 - Does not claim messages that contain user text, `bodyForAgent`, or transcript text.
+- Registers both `inbound_claim` and a `before_dispatch` fallback, because current OpenClaw dispatch only targets `inbound_claim` for plugin-owned conversation bindings.
 - Detects generic `[Attachment: /path/to/file]` markers.
 - Detects common metadata paths: `mediaPaths`, `MediaPaths`, `localMediaPaths`, `mediaPath`, `MediaPath`, and `mediaList`.
 - Stages readable local files with `obsidian_workflows.py attachment-stage`.
@@ -29,7 +30,7 @@ Without an early `inbound_claim` guard, each media-only event can be sent to the
 
 ## Requirements
 
-- OpenClaw 2026.6.11 or a compatible version with `inbound_claim` typed hooks.
+- OpenClaw 2026.6.11 or a compatible version with `inbound_claim` and `before_dispatch` typed hooks.
 - Node.js 22.19 or newer.
 - `obsidian-cli-plugins` installed as an OpenClaw, Codex, or cc-switch skill when `stageAttachments` is enabled.
 

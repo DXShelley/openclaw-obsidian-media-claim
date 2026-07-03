@@ -7,6 +7,10 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const ATTACHMENT_MARKER_RE = /\[Attachment:\s*([^\]\r\n]+?)\s*\]/g;
 const DEFAULT_REPLY = "收到媒体，已保存。";
+const CLAIM_HOOK_OPTIONS = {
+  priority: 100,
+  timeoutMs: 15000
+};
 const DEFAULT_WORKFLOWS_PATHS = [
   join(homedir(), ".openclaw/skills/obsidian-cli-plugins/scripts/obsidian_workflows.py"),
   join(homedir(), ".codex/skills/obsidian-cli-plugins/scripts/obsidian_workflows.py"),
@@ -16,17 +20,18 @@ const DEFAULT_WORKFLOWS_PATHS = [
 export const id = "obsidian-media-claim";
 export const name = "Obsidian Media Claim";
 export const description = "Intercept media-only inbound messages before the LLM.";
-export const version = "0.1.0";
+export const version = "0.1.2";
 
 export function register(api) {
   api.on(
     "inbound_claim",
     async (event, ctx) => handleInboundClaim(event, ctx),
-    {
-      name: "obsidian-media-claim:inbound-claim",
-      description: "Short-circuit media-only messages and stage readable local attachments.",
-      timeoutMs: 15000
-    }
+    CLAIM_HOOK_OPTIONS
+  );
+  api.on(
+    "before_dispatch",
+    async (event, ctx) => handleBeforeDispatch(event, ctx),
+    CLAIM_HOOK_OPTIONS
   );
 }
 
@@ -60,6 +65,15 @@ export async function handleInboundClaim(event, ctx = {}) {
         stageError
       })
     }
+  };
+}
+
+export async function handleBeforeDispatch(event, ctx = {}) {
+  const result = await handleInboundClaim(event, ctx);
+  if (!result?.handled) return;
+  return {
+    handled: true,
+    text: result.reply?.content || DEFAULT_REPLY
   };
 }
 

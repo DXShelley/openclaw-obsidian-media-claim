@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Register a `before_dispatch` fallback hook so media-only messages from normal channel dispatch are claimed before the LLM, even when they are not routed through a plugin-owned conversation binding.
+- Keep the runtime export version aligned with `package.json`.
+
 ## 0.1.1
 
 - Clarify that this package is an OpenClaw `inbound_claim` typed-hook plugin, not a general npm library.

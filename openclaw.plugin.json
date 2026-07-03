@@ -2,12 +2,13 @@
   "id": "obsidian-media-claim",
   "name": "Obsidian Media Claim",
   "description": "Intercept media-only inbound messages before the LLM and stage readable attachments for obsidian-cli-plugins.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "capabilities": [
     "hooks"
   ],
   "hooks": [
-    "inbound_claim"
+    "inbound_claim",
+    "before_dispatch"
   ],
   "configSchema": {
     "type": "object",

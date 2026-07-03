@@ -3,6 +3,7 @@ import {
   buildBatchKey,
   detectMediaType,
   extractAttachmentPaths,
+  handleBeforeDispatch,
   handleInboundClaim,
   hasUserText,
   inspectInboundMedia
@@ -70,6 +71,23 @@ const textResult = await handleInboundClaim({
   content: "把这张图记录一下\n[Attachment: /tmp/a.png]"
 });
 assert.equal(textResult, undefined);
+
+const beforeDispatchResult = await handleBeforeDispatch(
+  {
+    channel: "qqbot",
+    body: "",
+    content: "[Attachment: /tmp/not-readable.png]"
+  },
+  {
+    pluginConfig: {
+      stageAttachments: false
+    }
+  }
+);
+assert.deepEqual(beforeDispatchResult, {
+  handled: true,
+  text: "收到媒体，但当前渠道没有提供可读的本地文件路径。"
+});
 
 const ignoredResult = await handleInboundClaim(
   {
