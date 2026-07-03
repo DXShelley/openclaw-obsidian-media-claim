@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+- Claim empty-body `before_dispatch` events from media-capable channels, covering QQBot media events whose attachment marker is only added later in the session transcript.
+
 ## 0.1.2
 
 - Register a `before_dispatch` fallback hook so media-only messages from normal channel dispatch are claimed before the LLM, even when they are not routed through a plugin-owned conversation binding.

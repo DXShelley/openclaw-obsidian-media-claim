@@ -1,6 +1,6 @@
 {
   "name": "obsidian-media-claim",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "OpenClaw plugin that intercepts media-only inbound messages before the LLM and stages readable attachments for obsidian-cli-plugins.",
   "homepage": "https://github.com/DXShelley/openclaw-obsidian-media-claim#readme",
   "repository": {

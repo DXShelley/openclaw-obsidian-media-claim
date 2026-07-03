@@ -2,7 +2,7 @@
   "id": "obsidian-media-claim",
   "name": "Obsidian Media Claim",
   "description": "Intercept media-only inbound messages before the LLM and stage readable attachments for obsidian-cli-plugins.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "capabilities": [
     "hooks"
   ],
@@ -45,6 +45,18 @@
           "type": "string"
         },
         "description": "Optional denylist of OpenClaw channel ids."
+      },
+      "claimEmptyBodyMediaEvents": {
+        "type": "boolean",
+        "default": true,
+        "description": "Claim empty-body dispatch events from media-capable channels as media-only messages."
+      },
+      "emptyBodyMediaChannels": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Channels where an empty before_dispatch body should be treated as a media-only event."
       }
     }
   }

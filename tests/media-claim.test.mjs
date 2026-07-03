@@ -6,7 +6,8 @@ import {
   handleBeforeDispatch,
   handleInboundClaim,
   hasUserText,
-  inspectInboundMedia
+  inspectInboundMedia,
+  shouldClaimEmptyBodyMediaEvent
 } from "../index.js";
 
 assert.deepEqual(
@@ -88,6 +89,54 @@ assert.deepEqual(beforeDispatchResult, {
   handled: true,
   text: "收到媒体，但当前渠道没有提供可读的本地文件路径。"
 });
+
+assert.equal(
+  shouldClaimEmptyBodyMediaEvent(
+    {
+      channel: "qqbot",
+      body: "",
+      content: ""
+    },
+    {
+      pluginConfig: {
+        stageAttachments: false
+      }
+    }
+  ),
+  true
+);
+
+const emptyBeforeDispatchResult = await handleBeforeDispatch(
+  {
+    channel: "qqbot",
+    body: "",
+    content: ""
+  },
+  {
+    pluginConfig: {
+      stageAttachments: false,
+      replyContent: "收到媒体，已保存 📹"
+    }
+  }
+);
+assert.deepEqual(emptyBeforeDispatchResult, {
+  handled: true,
+  text: "收到媒体，已保存 📹"
+});
+
+const emptyTextChannelResult = await handleBeforeDispatch(
+  {
+    channel: "sms",
+    body: "",
+    content: ""
+  },
+  {
+    pluginConfig: {
+      stageAttachments: false
+    }
+  }
+);
+assert.equal(emptyTextChannelResult, undefined);
 
 const ignoredResult = await handleInboundClaim(
   {

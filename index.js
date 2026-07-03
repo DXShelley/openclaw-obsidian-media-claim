@@ -7,6 +7,7 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 const ATTACHMENT_MARKER_RE = /\[Attachment:\s*([^\]\r\n]+?)\s*\]/g;
 const DEFAULT_REPLY = "收到媒体，已保存。";
+const DEFAULT_EMPTY_BODY_MEDIA_CHANNELS = ["qqbot", "wecom", "webchat", "telegram", "feishu"];
 const CLAIM_HOOK_OPTIONS = {
   priority: 100,
   timeoutMs: 15000
@@ -20,7 +21,7 @@ const DEFAULT_WORKFLOWS_PATHS = [
 export const id = "obsidian-media-claim";
 export const name = "Obsidian Media Claim";
 export const description = "Intercept media-only inbound messages before the LLM.";
-export const version = "0.1.2";
+export const version = "0.1.3";
 
 export function register(api) {
   api.on(
@@ -70,11 +71,25 @@ export async function handleInboundClaim(event, ctx = {}) {
 
 export async function handleBeforeDispatch(event, ctx = {}) {
   const result = await handleInboundClaim(event, ctx);
+  if (!result?.handled && shouldClaimEmptyBodyMediaEvent(event, ctx)) {
+    return {
+      handled: true,
+      text: normalizeConfig(ctx.pluginConfig).replyContent
+    };
+  }
   if (!result?.handled) return;
   return {
     handled: true,
     text: result.reply?.content || DEFAULT_REPLY
   };
+}
+
+export function shouldClaimEmptyBodyMediaEvent(event, ctx = {}) {
+  const config = normalizeConfig(ctx.pluginConfig);
+  if (!config.claimEmptyBodyMediaEvents || !isChannelAllowed(event?.channel, config)) return false;
+  if (hasUserText(event)) return false;
+  const channel = asString(event?.channel);
+  return config.emptyBodyMediaChannels.includes(channel);
 }
 
 export function inspectInboundMedia(event) {
@@ -173,7 +188,11 @@ function normalizeConfig(value) {
     python: asString(config.python) || "python3",
     obsidianWorkflowsPath: asString(config.obsidianWorkflowsPath) || findDefaultWorkflowsPath(),
     onlyChannels: extractStringArray(config.onlyChannels),
-    ignoredChannels: extractStringArray(config.ignoredChannels)
+    ignoredChannels: extractStringArray(config.ignoredChannels),
+    claimEmptyBodyMediaEvents: config.claimEmptyBodyMediaEvents !== false,
+    emptyBodyMediaChannels: extractStringArray(config.emptyBodyMediaChannels).length > 0
+      ? extractStringArray(config.emptyBodyMediaChannels)
+      : DEFAULT_EMPTY_BODY_MEDIA_CHANNELS
   };
 }
 

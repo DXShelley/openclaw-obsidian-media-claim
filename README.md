@@ -21,6 +21,7 @@ Without an early `inbound_claim` guard, each media-only event can be sent to the
 - Claims only media-only inbound messages.
 - Does not claim messages that contain user text, `bodyForAgent`, or transcript text.
 - Registers both `inbound_claim` and a `before_dispatch` fallback, because current OpenClaw dispatch only targets `inbound_claim` for plugin-owned conversation bindings.
+- Treats empty-body dispatch events from configured media-capable channels as media-only events. This covers QQBot media messages where the session transcript later gets an `[Attachment: ...]` marker, but the `before_dispatch` hook event itself has no media metadata.
 - Detects generic `[Attachment: /path/to/file]` markers.
 - Detects common metadata paths: `mediaPaths`, `MediaPaths`, `localMediaPaths`, `mediaPath`, `MediaPath`, and `mediaList`.
 - Stages readable local files with `obsidian_workflows.py attachment-stage`.
@@ -87,7 +88,9 @@ Then enable the plugin with conversation access for `inbound_claim`:
   "python": "python3",
   "obsidianWorkflowsPath": "/Users/you/.openclaw/skills/obsidian-cli-plugins/scripts/obsidian_workflows.py",
   "onlyChannels": ["qqbot", "wecom", "webchat"],
-  "ignoredChannels": ["telegram"]
+  "ignoredChannels": ["telegram"],
+  "claimEmptyBodyMediaEvents": true,
+  "emptyBodyMediaChannels": ["qqbot", "wecom", "webchat", "telegram", "feishu"]
 }
 ```
 
@@ -99,6 +102,8 @@ Fields:
 - `obsidianWorkflowsPath`: explicit path to the Obsidian workflow launcher. This script is executed locally with `execFile`; configure only trusted paths because its behavior controls the real attachment-staging side effects.
 - `onlyChannels`: optional channel allowlist.
 - `ignoredChannels`: optional channel denylist.
+- `claimEmptyBodyMediaEvents`: claim empty `before_dispatch` events from media-capable channels. Disable this if one of your channels legitimately sends empty text-only messages that should reach the agent.
+- `emptyBodyMediaChannels`: channel ids where empty `before_dispatch` bodies are treated as media-only events.
 
 If `obsidianWorkflowsPath` is omitted, the plugin tries these paths:
 
