@@ -1,0 +1,50 @@
+{
+  "id": "obsidian-media-claim",
+  "name": "Obsidian Media Claim",
+  "description": "Intercept media-only inbound messages before the LLM and stage readable attachments for obsidian-cli-plugins.",
+  "version": "0.1.0",
+  "capabilities": [
+    "hooks"
+  ],
+  "hooks": [
+    "inbound_claim"
+  ],
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "stageAttachments": {
+        "type": "boolean",
+        "default": true,
+        "description": "Stage readable local attachment paths through obsidian_workflows.py attachment-stage."
+      },
+      "replyContent": {
+        "type": "string",
+        "default": "收到媒体，已保存。",
+        "description": "Synthetic reply sent when a media-only message is claimed."
+      },
+      "python": {
+        "type": "string",
+        "description": "Python executable used to call obsidian_workflows.py."
+      },
+      "obsidianWorkflowsPath": {
+        "type": "string",
+        "description": "Absolute path to obsidian-cli-plugins/scripts/obsidian_workflows.py."
+      },
+      "onlyChannels": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Optional allowlist of OpenClaw channel ids."
+      },
+      "ignoredChannels": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Optional denylist of OpenClaw channel ids."
+      }
+    }
+  }
+}

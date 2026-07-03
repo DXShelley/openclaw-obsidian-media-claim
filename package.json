@@ -1,0 +1,72 @@
+{
+  "name": "obsidian-media-claim",
+  "version": "0.1.0",
+  "description": "OpenClaw plugin that intercepts media-only inbound messages before the LLM and stages readable attachments for obsidian-cli-plugins.",
+  "homepage": "https://github.com/DXShelley/openclaw-obsidian-media-claim#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DXShelley/openclaw-obsidian-media-claim.git"
+  },
+  "bugs": {
+    "url": "https://github.com/DXShelley/openclaw-obsidian-media-claim/issues"
+  },
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "openclaw.plugin.json",
+    "README.md",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node ./tests/media-claim.test.mjs",
+    "validate:json": "node ./tests/validate-json.mjs",
+    "verify": "npm run validate:json && npm test",
+    "verify:install": "openclaw plugins install . --force && openclaw plugins inspect obsidian-media-claim",
+    "pack:dry-run": "npm pack --dry-run",
+    "prepack": "npm run verify"
+  },
+  "keywords": [
+    "openclaw",
+    "openclaw-plugin",
+    "obsidian",
+    "attachments",
+    "inbound-claim",
+    "media"
+  ],
+  "engines": {
+    "node": ">=22.19"
+  },
+  "openclaw": {
+    "extensions": [
+      "./index.js"
+    ],
+    "compat": {
+      "pluginApi": ">=2026.6.11"
+    },
+    "build": {
+      "openclawVersion": "2026.6.11"
+    },
+    "hostTargets": [
+      "darwin",
+      "linux",
+      "win32"
+    ],
+    "environment": {
+      "requires": [
+        "Node.js >=22.19",
+        "OpenClaw with inbound_claim typed hooks",
+        "obsidian-cli-plugins when stageAttachments is enabled"
+      ]
+    }
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
