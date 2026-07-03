@@ -2,6 +2,8 @@
 
 OpenClaw plugin that intercepts media-only inbound messages before they reach the LLM. If the channel provides readable local attachment paths, the plugin stages them through `obsidian-cli-plugins` so a later text message can create one Obsidian file-mode record with all staged media.
 
+This is an OpenClaw runtime plugin, not a general-purpose npm library. It depends on OpenClaw's `inbound_claim` typed hook and is useful only inside an OpenClaw plugin runtime that supports that hook.
+
 ## Why
 
 Some channels deliver several images or videos as separate media-only events before the user sends the actual instruction, for example:
@@ -22,11 +24,13 @@ Without an early `inbound_claim` guard, each media-only event can be sent to the
 - Detects common metadata paths: `mediaPaths`, `MediaPaths`, `localMediaPaths`, `mediaPath`, `MediaPath`, and `mediaList`.
 - Stages readable local files with `obsidian_workflows.py attachment-stage`.
 - Supports optional channel allow/deny lists.
+- Does not write Obsidian notes or media files directly; Obsidian-side effects are delegated to `obsidian-cli-plugins/scripts/obsidian_workflows.py`.
+- May still claim media-only messages when only remote media URLs are present, but it cannot stage attachments unless the channel/runtime exposes readable local file paths.
 
 ## Requirements
 
 - OpenClaw 2026.6.11 or a compatible version with `inbound_claim` typed hooks.
-- Node.js 20 or newer.
+- Node.js 22.19 or newer.
 - `obsidian-cli-plugins` installed as an OpenClaw, Codex, or cc-switch skill when `stageAttachments` is enabled.
 
 ## Install
@@ -91,7 +95,7 @@ Fields:
 - `stageAttachments`: set `false` to claim media-only messages without staging files.
 - `replyContent`: synthetic reply for claimed messages.
 - `python`: Python executable used for `obsidian_workflows.py`.
-- `obsidianWorkflowsPath`: explicit path to the Obsidian workflow launcher.
+- `obsidianWorkflowsPath`: explicit path to the Obsidian workflow launcher. This script is executed locally with `execFile`; configure only trusted paths because its behavior controls the real attachment-staging side effects.
 - `onlyChannels`: optional channel allowlist.
 - `ignoredChannels`: optional channel denylist.
 
