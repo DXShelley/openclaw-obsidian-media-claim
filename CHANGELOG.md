@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+## 0.1.12 - 2026-07-06
+
+- Scope pending-media prompt injection to trusted runtime batch keys, skip injection when the key cannot be built, and escape staged attachment ids and labels before adding them to model context.
+- Await asynchronous `reply_dispatch` final replies and fail open from hook wrapper errors after writing debug diagnostics.
+- Document QQ channel staging failures caused by OpenClaw resolving `python3` to a Python version older than 3.10, including the debug-log symptom and the recommended absolute Python path configuration.
 - Include explicit staged ids in `before_prompt_build` context and instruct Agents to retry with those ids if a returned `batch:<key>` selector is not consumed by `record-sync`.
-- Query `attachment-pending` with a prompt-derived `--batch-key` when conversation metadata is available, reducing stale-batch ambiguity while keeping the skill's unique-batch fallback.
+- Query `attachment-pending` with a trusted runtime `--batch-key` when conversation metadata is available, reducing stale-batch ambiguity without using prompt text as an attachment lookup authority.
 - Document skill-only compatibility: normal Obsidian record workflows work with `obsidian-cli-plugins` alone, while media-only-then-text channel staging requires this plugin or manual `attachment-stage`.
 - Add a `before_prompt_build` staged-media prompt injection for later text turns that ask to record earlier videos/media/attachments. It looks up `attachment-pending --ttl-hours 48` and tells the Agent to use the returned `batch:<key>` selector instead of searching the current directory.
 - Add `pendingMediaPromptInjection` config, enabled by default.

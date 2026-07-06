@@ -33,6 +33,7 @@ const DEFAULT_DEBUG_LOG_PATH = "/tmp/obsidian-media-claim-debug.jsonl";
 const DEBUG_STRING_LIMIT = 4000;
 const DEBUG_ARRAY_LIMIT = 20;
 const DEBUG_OBJECT_KEYS_LIMIT = 80;
+const PROMPT_VALUE_LIMIT = 200;
 const MEDIA_REFERENCE_RE = /(视频|录像|图片|照片|图像|音频|语音|媒体|附件|文件|上面|前面|刚才|刚刚|这些|这几个|这两|两条|两个|above|previous|earlier|media|video|image|audio|attachment|file)/i;
 const RECORD_INTENT_RE = /(记录|记一下|保存|存一下|写入|同步|归档|ob|obsidian|record|save|attach|archive)/i;
 const DEFAULT_WORKFLOWS_PATHS = [
@@ -44,7 +45,7 @@ const DEFAULT_WORKFLOWS_PATHS = [
 export const id = "obsidian-media-claim";
 export const name = "Obsidian Media Claim";
 export const description = "Intercept media-only inbound messages before the LLM.";
-export const version = "0.1.11";
+export const version = "0.1.12";
 
 export function register(api) {
   const registerCtx = withPluginConfig({}, api);
@@ -76,7 +77,7 @@ export function register(api) {
         writeDebugLog("reply_dispatch.error", {
           error: normalizeError(error)
         }, runtimeCtx);
-        throw error;
+        return;
       }
     },
     REPLY_DISPATCH_HOOK_OPTIONS
@@ -100,7 +101,7 @@ export function register(api) {
         writeDebugLog("inbound_claim.error", {
           error: normalizeError(error)
         }, runtimeCtx);
-        throw error;
+        return;
       }
     },
     CLAIM_HOOK_OPTIONS
@@ -121,7 +122,7 @@ export function register(api) {
         writeDebugLog("before_dispatch.error", {
           error: normalizeError(error)
         }, runtimeCtx);
-        throw error;
+        return;
       }
     },
     BEFORE_DISPATCH_HOOK_OPTIONS
@@ -142,7 +143,7 @@ export function register(api) {
         writeDebugLog("before_agent_reply.error", {
           error: normalizeError(error)
         }, runtimeCtx);
-        throw error;
+        return;
       }
     },
     AGENT_REPLY_HOOK_OPTIONS
@@ -163,7 +164,7 @@ export function register(api) {
         writeDebugLog("before_prompt_build.error", {
           error: normalizeError(error)
         }, runtimeCtx);
-        throw error;
+        return;
       }
     },
     PROMPT_BUILD_HOOK_OPTIONS
@@ -206,7 +207,9 @@ export async function handleReplyDispatch(event, ctx = {}) {
   }
 
   const replyText = replyTextFromResult(result);
-  const queuedFinal = Boolean(ctx.dispatcher?.sendFinalReply?.({ text: replyText }));
+  const queuedFinal = typeof ctx.dispatcher?.sendFinalReply === "function"
+    ? Boolean(await ctx.dispatcher.sendFinalReply({ text: replyText }))
+    : false;
   const replyResult = {
     handled: true,
     queuedFinal,
@@ -384,6 +387,11 @@ export async function handleBeforePromptBuild(event, ctx = {}) {
   }
 
   const pendingBatchKey = buildPromptBatchKey(event, ctx);
+  if (!pendingBatchKey) {
+    writeDebugLog("handleBeforePromptBuild.pass.no_trusted_batch_key", {}, ctx);
+    return;
+  }
+
   let pending;
   try {
     pending = await getPendingAttachments(config, pendingBatchKey);
@@ -565,18 +573,14 @@ export function buildBatchKey(event) {
 }
 
 export function buildPromptBatchKey(event, ctx = {}) {
-  const metadata = extractPromptMetadata(event);
-  const chatId = firstString(metadata.conversation?.chat_id, metadata.conversation?.chatId, ctx.chatId);
-  const chatChannel = chatId.includes(":") ? chatId.split(":", 1)[0] : "";
-  const chatConversation = chatId.includes(":") ? chatId.slice(chatId.indexOf(":") + 1) : chatId;
   const promptEvent = {
-    channel: firstString(ctx.messageChannel, ctx.channel, ctx.messageProvider, metadata.conversation?.channel, chatChannel),
-    accountId: firstString(ctx.agentAccountId, ctx.accountId, metadata.conversation?.account_id, metadata.conversation?.accountId),
-    conversationId: firstString(ctx.channelId, ctx.conversationId, chatConversation),
-    senderId: firstString(ctx.requesterSenderId, ctx.senderId, metadata.conversation?.sender_id, metadata.sender?.id),
-    threadId: firstString(ctx.sessionKey, event?.sessionKey, metadata.conversation?.session_key)
+    channel: firstString(ctx.messageChannel, ctx.channel, ctx.messageProvider),
+    accountId: firstString(ctx.agentAccountId, ctx.accountId),
+    conversationId: firstString(ctx.channelId, ctx.conversationId, ctx.chatId),
+    senderId: firstString(ctx.requesterSenderId, ctx.senderId),
+    threadId: firstString(ctx.sessionKey, event?.sessionKey)
   };
-  if (![promptEvent.channel, promptEvent.accountId, promptEvent.conversationId, promptEvent.senderId, promptEvent.threadId].some(Boolean)) {
+  if (!promptEvent.channel || !promptEvent.conversationId || !promptEvent.senderId) {
     return "";
   }
   const batchKey = buildBatchKey(promptEvent);
@@ -607,32 +611,37 @@ export function buildPendingMediaPromptContext(pending, config = {}) {
   const typeCounts = countAttachmentTypes(attachments);
   const labels = attachments
     .slice(0, 10)
-    .map((item, index) => `${index + 1}. ${asString(item?.label) || asString(item?.id) || "attachment"} (${asString(item?.type) || "file"})`);
+    .map((item, index) => {
+      const label = promptJsonString(firstString(item?.label, item?.id, "attachment"));
+      const type = promptJsonString(firstString(item?.type, "file"), 50);
+      return `${index + 1}. label=${label} type=${type}`;
+    });
   const typeSummary = Object.entries(typeCounts)
     .map(([type, count]) => `${type}:${count}`)
     .join(", ") || "unknown";
   const python = asString(config.python) || "python3";
   const workflowsPath = asString(config.obsidianWorkflowsPath) || findDefaultWorkflowsPath();
   const resolvedBatchKey = asString(pending?.resolved_batch_key || pending?.batch_key);
+  const selector = asString(pending?.selector);
   const ids = extractPendingIds(pending);
   const pendingCommand = [
-    python,
-    workflowsPath,
+    quoteCommandArg(python),
+    quoteCommandArg(workflowsPath),
     "attachment-pending",
-    resolvedBatchKey ? `--batch-key "${resolvedBatchKey}"` : "",
+    resolvedBatchKey ? `--batch-key ${quoteCommandArg(resolvedBatchKey)}` : "",
     "--ttl-hours",
     String(config.stagedAttachmentTtlHours || DEFAULT_STAGE_TTL_HOURS)
   ].filter(Boolean).join(" ");
-  const idArgs = ids.map((attachmentId) => `--staged-attachment "${attachmentId}"`).join(" ");
+  const idArgs = ids.map((attachmentId) => `--staged-attachment ${quoteCommandArg(attachmentId)}`).join(" ");
 
   return [
     "OpenClaw staged media context (trusted runtime metadata):",
     `There are ${Number(pending?.count || attachments.length || 0)} pending media/file attachment(s) staged from earlier media-only channel messages.`,
-    `Selector: ${asString(pending?.selector)}`,
-    `Resolved batch key: ${resolvedBatchKey}`,
+    `Selector (JSON string): ${promptJsonString(selector)}`,
+    `Resolved batch key (JSON string): ${promptJsonString(resolvedBatchKey)}`,
     `Types: ${typeSummary}`,
-    ids.length > 0 ? `Staged attachment ids:\n${ids.map((attachmentId) => `- ${attachmentId}`).join("\n")}` : "",
-    labels.length > 0 ? `Labels:\n${labels.join("\n")}` : "",
+    ids.length > 0 ? `Staged attachment ids (JSON strings):\n${ids.map((attachmentId) => `- ${promptJsonString(attachmentId)}`).join("\n")}` : "",
+    labels.length > 0 ? `Untrusted display labels (JSON strings):\n${labels.join("\n")}` : "",
     "",
     "When the current user asks to record/use the earlier videos/media/attachments, do not search the current directory and do not ask for paths.",
     "Use the obsidian-cli-plugins staged attachment workflow:",
@@ -960,27 +969,6 @@ function extractPromptText(event) {
   return [direct, latestUserText].filter(Boolean).join("\n\n");
 }
 
-function extractPromptMetadata(event) {
-  const text = extractPromptText(event);
-  return {
-    conversation: parsePromptJsonBlock(text, "Conversation info"),
-    sender: parsePromptJsonBlock(text, "Sender")
-  };
-}
-
-function parsePromptJsonBlock(text, label) {
-  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(`${escaped} \\(untrusted metadata\\):\\s*\`\`\`(?:json)?\\s*([\\s\\S]*?)\\s*\`\`\``, "i");
-  const match = pattern.exec(text);
-  if (!match) return {};
-  try {
-    const parsed = JSON.parse(match[1]);
-    return isRecord(parsed) ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
 function extractMessageText(content) {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return asString(content);
@@ -994,7 +982,7 @@ function extractMessageText(content) {
 function countAttachmentTypes(attachments) {
   const counts = {};
   for (const item of attachments) {
-    const type = asString(item?.type) || "file";
+    const type = sanitizePromptValue(firstString(item?.type, "file"), 50);
     counts[type] = (counts[type] || 0) + 1;
   }
   return counts;
@@ -1014,6 +1002,24 @@ function sanitizeBatchKeyPart(value) {
 function positiveNumber(value, fallback) {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? number : fallback;
+}
+
+function promptJsonString(value, limit = PROMPT_VALUE_LIMIT) {
+  return JSON.stringify(sanitizePromptValue(value, limit));
+}
+
+function sanitizePromptValue(value, limit = PROMPT_VALUE_LIMIT) {
+  const text = asString(value)
+    .replace(/[\u0000-\u001f\u007f]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (text.length <= limit) return text;
+  return `${text.slice(0, limit)}...`;
+}
+
+function quoteCommandArg(value) {
+  const text = sanitizePromptValue(value, 1000);
+  return `"${text.replace(/["\\$`]/g, "\\$&")}"`;
 }
 
 function inspectTextSignals(event) {

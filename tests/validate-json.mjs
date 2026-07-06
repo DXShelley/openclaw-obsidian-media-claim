@@ -12,5 +12,12 @@ assert.deepEqual(pluginJson.hooks, [
   "before_agent_reply",
   "before_prompt_build"
 ]);
+assert.equal(pluginJson.configSchema.additionalProperties, false);
+assert.equal(pluginJson.configSchema.properties.stageAttachments.default, true);
+assert.match(pluginJson.configSchema.properties.python.description, /Python 3\.10\+/);
+assert.match(pluginJson.configSchema.properties.python.description, /absolute path/i);
+assert.equal(pluginJson.configSchema.properties.pendingMediaPromptInjection.default, true);
+assert.match(pluginJson.configSchema.properties.pendingMediaPromptInjection.description, /trusted runtime conversation metadata/i);
+assert.equal(pluginJson.configSchema.properties.debugLogging.default, false);
 
 console.log("json validation passed");

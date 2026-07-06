@@ -2,7 +2,7 @@
   "id": "obsidian-media-claim",
   "name": "Obsidian Media Claim",
   "description": "Optional pre-model media guard for obsidian-cli-plugins: claim media-only uploads before the LLM, stage readable attachments, and avoid unnecessary token spend.",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "capabilities": [
     "hooks"
   ],
@@ -29,7 +29,7 @@
       },
       "python": {
         "type": "string",
-        "description": "Python executable used to call obsidian_workflows.py."
+        "description": "Python 3.10+ executable used to call obsidian_workflows.py. Prefer an absolute path because gateway service PATH can differ from an interactive shell."
       },
       "obsidianWorkflowsPath": {
         "type": "string",
@@ -77,7 +77,7 @@
       "pendingMediaPromptInjection": {
         "type": "boolean",
         "default": true,
-        "description": "Inject staged media workflow guidance into later text turns that ask to record earlier videos/media/attachments."
+        "description": "Inject staged media workflow guidance into later text turns that ask to record earlier videos/media/attachments, only when trusted runtime conversation metadata can build a scoped batch key."
       },
       "debugLogging": {
         "type": "boolean",
