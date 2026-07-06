@@ -23,6 +23,7 @@ assert.equal(pluginJson.configSchema.properties.debugLogging.default, false);
 assert.match(npmPublishWorkflow, /name:\s*Publish npm package/);
 assert.match(npmPublishWorkflow, /tags:\s*\n\s+- "v\*\.\*\.\*"/);
 assert.match(npmPublishWorkflow, /node-version:\s*"22\.19\.0"/);
+assert.match(npmPublishWorkflow, /npm install -g npm@latest/);
 assert.match(npmPublishWorkflow, /npm run verify/);
 assert.doesNotMatch(npmPublishWorkflow, /secrets\.NPM_TOKEN/);
 assert.doesNotMatch(npmPublishWorkflow, /NODE_AUTH_TOKEN/);

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.1.14 - 2026-07-06
+
+- Update the npm publish workflow to install a current npm CLI before Trusted Publishing, matching npm's OIDC publishing requirements.
+
 ## 0.1.13 - 2026-07-06
 
 - Add a GitHub Actions npm publish workflow for stable `vX.Y.Z` tags, with version matching, verification, duplicate-version skip, and npm provenance.

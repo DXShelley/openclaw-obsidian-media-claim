@@ -266,7 +266,7 @@ git push origin dev
 git push origin "v${VERSION}"
 ```
 
-The workflow accepts tags like `v0.1.13`, requires the tag to match `package.json#version`, runs `npm ci` and `npm run verify`, skips publishing if that exact version already exists on npm, and publishes with npm provenance. It can also be started manually from the GitHub Actions page with `workflow_dispatch`; manual runs publish the current `package.json#version` after the same checks.
+The workflow accepts tags like `v0.1.14`, requires the tag to match `package.json#version`, runs `npm ci`, updates the runner to npm 11.5.1 or newer for Trusted Publishing, runs `npm run verify`, skips publishing if that exact version already exists on npm, and publishes with npm provenance. It can also be started manually from the GitHub Actions page with `workflow_dispatch`; manual runs publish the current `package.json#version` after the same checks.
 
 Use the automated workflow for normal releases. It uses OpenID Connect and does not require an `NPM_TOKEN` GitHub secret. The local `npm publish` commands below are only for emergency/manual publishing from a logged-in workstation, and may require an npm OTP if the account enforces 2FA.
 
