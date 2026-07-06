@@ -250,7 +250,7 @@ npm install
 npm run build
 ```
 
-GitHub Pages is deployed by `.github/workflows/pages.yml` from the `dev` branch when `website/**` changes, and from stable `vX.Y.Z` tags during releases. The npm publish workflow also builds `website/` before publishing, so release tags verify the pages before the package is published.
+GitHub Pages is deployed by `.github/workflows/pages.yml` from the `dev` branch when `website/**` changes. The npm publish workflow also builds `website/` before publishing, so release tags verify the pages before the package is published without attempting a tag-based Pages deployment.
 
 ## Publish
 

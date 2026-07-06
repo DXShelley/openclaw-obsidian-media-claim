@@ -40,7 +40,7 @@ interface SiteConfig {
   readonly support: readonly { readonly title: string; readonly body: string; readonly image: string; readonly alt: string }[];
 }
 
-const VERSION = 'v0.1.15';
+const VERSION = 'v0.1.16';
 const imageManagerUrlZh = 'https://dxshelley.github.io/obsidian-image-manager/';
 const imageManagerUrlEn = 'https://dxshelley.github.io/obsidian-image-manager/?lang=en';
 const skillUrlZh = 'https://dxshelley.github.io/obsidian-cli-plugins-skill/';

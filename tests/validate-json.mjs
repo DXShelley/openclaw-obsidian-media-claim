@@ -40,7 +40,7 @@ assert.equal(websitePackageJson.private, true);
 assert.equal(websitePackageJson.version, packageJson.version);
 assert.match(pagesWorkflow, /name:\s*Deploy Website/);
 assert.match(pagesWorkflow, /branches:\s*\n\s+- dev/);
-assert.match(pagesWorkflow, /tags:\s*\n\s+- "v\*\.\*\.\*"/);
+assert.doesNotMatch(pagesWorkflow, /tags:\s*\n\s+- "v\*\.\*\.\*"/);
 assert.match(pagesWorkflow, /website\/\*\*/);
 assert.match(pagesWorkflow, /npm run build/);
 assert.match(pagesWorkflow, /uses:\s*actions\/deploy-pages@v4/);

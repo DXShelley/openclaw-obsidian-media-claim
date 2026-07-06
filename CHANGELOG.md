@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 0.1.16 - 2026-07-06
+
+- Remove tag-based GitHub Pages deployments because this repository's Pages environment deploys successfully from `dev` and rejects tag deployment attempts.
+- Keep release tags building the website through the npm publish workflow without deploying Pages from tags.
+
 ## 0.1.15 - 2026-07-06
 
 - Add the static project website and GitHub Pages deployment workflow.

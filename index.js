@@ -45,7 +45,7 @@ const DEFAULT_WORKFLOWS_PATHS = [
 export const id = "obsidian-media-claim";
 export const name = "Obsidian Media Claim";
 export const description = "Intercept media-only inbound messages before the LLM.";
-export const version = "0.1.15";
+export const version = "0.1.16";
 
 export function register(api) {
   const registerCtx = withPluginConfig({}, api);
