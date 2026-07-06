@@ -24,7 +24,9 @@ assert.match(npmPublishWorkflow, /name:\s*Publish npm package/);
 assert.match(npmPublishWorkflow, /tags:\s*\n\s+- "v\*\.\*\.\*"/);
 assert.match(npmPublishWorkflow, /node-version:\s*"22\.19\.0"/);
 assert.match(npmPublishWorkflow, /npm run verify/);
-assert.match(npmPublishWorkflow, /secrets\.NPM_TOKEN/);
+assert.doesNotMatch(npmPublishWorkflow, /secrets\.NPM_TOKEN/);
+assert.doesNotMatch(npmPublishWorkflow, /NODE_AUTH_TOKEN/);
+assert.match(npmPublishWorkflow, /id-token:\s*write/);
 assert.match(npmPublishWorkflow, /npm publish --access public --registry https:\/\/registry\.npmjs\.org\/ --provenance/);
 
 console.log("json validation passed");

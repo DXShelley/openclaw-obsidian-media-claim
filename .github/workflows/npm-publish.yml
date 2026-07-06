@@ -80,6 +80,4 @@ jobs:
 
       - name: Publish
         if: steps.published.outputs.exists != 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm publish --access public --registry https://registry.npmjs.org/ --provenance

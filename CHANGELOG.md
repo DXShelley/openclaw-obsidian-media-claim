@@ -2,7 +2,10 @@
 
 ## Unreleased
 
+## 0.1.13 - 2026-07-06
+
 - Add a GitHub Actions npm publish workflow for stable `vX.Y.Z` tags, with version matching, verification, duplicate-version skip, and npm provenance.
+- Use npm Trusted Publishing through GitHub OIDC instead of an `NPM_TOKEN` secret, and document the automated release flow.
 
 ## 0.1.12 - 2026-07-06
 

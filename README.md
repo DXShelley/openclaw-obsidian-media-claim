@@ -41,7 +41,7 @@ Without a pre-model guard, each media-only event can be sent to the model and wa
 - Stages readable local files with `obsidian_workflows.py attachment-stage`.
 - Prunes staged attachments older than 48 hours before saving newly uploaded media.
 - Uses a stable short hashed batch key so later commands can list pending media without relying on model-inferred attachment ids.
-- On later media-record text turns, looks up pending staged media with a trusted runtime batch key and injects the safe selector into the prompt. This does not run media understanding and does not expose media-only uploads to the LLM.
+- On later media-record text turns, looks up pending staged media with a trusted runtime batch key and injects the safe selector into the prompt. This does not run media understanding and does not expose media contents to the LLM.
 - Supports optional channel allow/deny lists.
 - Does not write Obsidian notes or media files directly; Obsidian-side effects are delegated to `obsidian-cli-plugins/scripts/obsidian_workflows.py`.
 - May still claim media-only messages when only remote media URLs are present, but it cannot stage attachments unless the channel/runtime exposes readable local file paths.
@@ -194,7 +194,7 @@ If a later text turn replies `视频文件不在当前目录中` or returns Open
 <configured-python> ~/.openclaw/skills/obsidian-cli-plugins/scripts/obsidian_workflows.py attachment-pending --ttl-hours 48
 ```
 
-If this returns a selector such as `batch:wecom-...`, the media was staged correctly and the failure is in the later Agent workflow. Ensure this plugin is version `0.1.11` or newer, `before_prompt_build` is listed by `openclaw plugins inspect obsidian-media-claim`, and `pendingMediaPromptInjection` is enabled.
+If this returns a selector such as `batch:wecom-...`, the media was staged correctly and the failure is in the later Agent workflow. Ensure this plugin is version `0.1.12` or newer for scoped prompt injection, `before_prompt_build` is listed by `openclaw plugins inspect obsidian-media-claim`, and `pendingMediaPromptInjection` is enabled.
 
 ## Skill-only compatibility
 
@@ -243,24 +243,32 @@ npm run pack:dry-run
 
 ### Automated npm publish
 
-GitHub Actions publishes stable semver tags automatically. Configure the repository secret first:
+GitHub Actions publishes stable semver tags automatically through npm Trusted Publishing. Configure the package on npm first:
 
 ```text
-NPM_TOKEN=<npm automation token with publish permission>
+Publisher: GitHub Actions
+Repository: DXShelley/openclaw-obsidian-media-claim
+Workflow: npm-publish.yml
+Permissions: npm publish, npm stage publish
 ```
 
-Then bump the patch version, commit it, create a matching tag, and push both the branch and tag:
+Then bump the patch version, sync the plugin runtime/manifest versions, commit it, create a matching tag, and push both the branch and tag:
 
 ```bash
 npm version patch --no-git-tag-version
+VERSION="$(node -p "require('./package.json').version")"
+node -e "const fs=require('fs'); const version=require('./package.json').version; const p='openclaw.plugin.json'; const json=JSON.parse(fs.readFileSync(p,'utf8')); json.version=version; fs.writeFileSync(p, JSON.stringify(json, null, 2) + '\n');"
+perl -0pi -e "s/export const version = \"[^\"]+\";/export const version = \"${VERSION}\";/" index.js
 git add package.json package-lock.json index.js openclaw.plugin.json CHANGELOG.md
-git commit -m "chore: release v$(node -p "require('./package.json').version")"
-git tag "v$(node -p "require('./package.json').version")"
+git commit -m "chore: release v${VERSION}"
+git tag "v${VERSION}"
 git push origin dev
-git push origin "v$(node -p "require('./package.json').version")"
+git push origin "v${VERSION}"
 ```
 
-The workflow accepts tags like `v0.1.12`, requires the tag to match `package.json#version`, runs `npm ci` and `npm run verify`, skips publishing if that exact version already exists on npm, and publishes with npm provenance.
+The workflow accepts tags like `v0.1.13`, requires the tag to match `package.json#version`, runs `npm ci` and `npm run verify`, skips publishing if that exact version already exists on npm, and publishes with npm provenance. It can also be started manually from the GitHub Actions page with `workflow_dispatch`; manual runs publish the current `package.json#version` after the same checks.
+
+Use the automated workflow for normal releases. It uses OpenID Connect and does not require an `NPM_TOKEN` GitHub secret. The local `npm publish` commands below are only for emergency/manual publishing from a logged-in workstation, and may require an npm OTP if the account enforces 2FA.
 
 Publish to npm:
 
