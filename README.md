@@ -4,6 +4,14 @@ OpenClaw plugin that intercepts media-only inbound messages before they reach th
 
 This is an OpenClaw runtime plugin, not a general-purpose npm library. It depends on OpenClaw typed hooks (`reply_dispatch`, `inbound_claim`, `before_dispatch`, `before_agent_reply`, and `before_prompt_build`) and is useful only inside an OpenClaw plugin runtime that supports those hooks.
 
+## Relationship to `obsidian-cli-plugins`
+
+`obsidian-cli-plugins` is the required capability for Obsidian records. Install the skill first; it owns vault discovery, Git preflight, record creation, attachment copying, staged-attachment consumption, and sync.
+
+This plugin is optional. It does not replace the skill and does not write Obsidian notes directly. Its main job is to guard media-only channel uploads before model dispatch, stage readable media paths for the skill, and avoid unnecessary LLM token spend on uploads that only need to be saved for a later record instruction.
+
+With only the skill installed, normal text records and explicit local attachment records still work. Without the skill, this plugin can at most claim/stage media; it cannot complete the Obsidian record workflow.
+
 ## Why
 
 Some channels deliver several images or videos as separate media-only events before the user sends the actual instruction, for example:
@@ -14,7 +22,7 @@ Some channels deliver several images or videos as separate media-only events bef
 把上面两张图记录到 ob
 ```
 
-Without a pre-model guard, each media-only event can be sent to the model and waste tokens. This plugin claims those events, replies with a short acknowledgement, and keeps the media available for the later Obsidian record workflow.
+Without a pre-model guard, each media-only event can be sent to the model and waste tokens. This plugin claims those events, replies with a short acknowledgement, and keeps the media available for the later Obsidian record workflow handled by `obsidian-cli-plugins`.
 
 ## Behavior
 
@@ -42,7 +50,7 @@ Without a pre-model guard, each media-only event can be sent to the model and wa
 
 - OpenClaw 2026.6.11 or a compatible version with `reply_dispatch`, `inbound_claim`, `before_dispatch`, `before_agent_reply`, and `before_prompt_build` typed hooks.
 - Node.js 22.19 or newer.
-- `obsidian-cli-plugins` installed as an OpenClaw, Codex, or cc-switch skill when `stageAttachments` is enabled.
+- `obsidian-cli-plugins` installed as an OpenClaw, Codex, or cc-switch skill. The skill is required for the actual Obsidian record workflow; this plugin is only the optional pre-model media guard and staged-handoff helper.
 
 ## Install
 
@@ -155,9 +163,9 @@ If this returns a selector such as `batch:wecom-...`, the media was staged corre
 
 ## Skill-only compatibility
 
-This plugin is not required for ordinary Obsidian records. If only `obsidian-cli-plugins` is installed, text records, task records, project records, and file-mode records with explicit local `--attach` paths should continue to work through the skill commands.
+This plugin is not required for ordinary Obsidian records. If only `obsidian-cli-plugins` is installed, text records, task records, project records, and file-mode records with explicit local `--attach` paths should continue to work through the skill commands. This is the supported baseline: the skill is mandatory; the plugin is an optional optimization for channel media uploads.
 
-The plugin is required only for the channel workflow where a phone client sends media-only messages first and text later. Without the plugin, OpenClaw has no pre-model component that can both claim those media-only turns and stage readable local paths for the later text command. In that setup the compatible fallback is manual or runtime-provided staging:
+The plugin is needed only for the channel workflow where a phone client sends media-only messages first and text later, and where you want those uploads to avoid model involvement. Without the plugin, OpenClaw may dispatch media-only uploads to the LLM or fail to stage them automatically. In that setup the compatible fallback is manual or runtime-provided staging:
 
 ```bash
 python3 ~/.openclaw/skills/obsidian-cli-plugins/scripts/obsidian_workflows.py attachment-stage --path "<local-media-path>" --type video --batch-key "<conversation-key>"

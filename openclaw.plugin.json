@@ -1,7 +1,7 @@
 {
   "id": "obsidian-media-claim",
   "name": "Obsidian Media Claim",
-  "description": "Intercept media-only inbound messages before the LLM and stage readable attachments for obsidian-cli-plugins.",
+  "description": "Optional pre-model media guard for obsidian-cli-plugins: claim media-only uploads before the LLM, stage readable attachments, and avoid unnecessary token spend.",
   "version": "0.1.11",
   "capabilities": [
     "hooks"
@@ -33,7 +33,7 @@
       },
       "obsidianWorkflowsPath": {
         "type": "string",
-        "description": "Absolute path to obsidian-cli-plugins/scripts/obsidian_workflows.py."
+        "description": "Absolute path to obsidian-cli-plugins/scripts/obsidian_workflows.py. The obsidian-cli-plugins skill is required for Obsidian record creation; this plugin only stages media for it."
       },
       "stagedAttachmentTtlHours": {
         "type": "number",

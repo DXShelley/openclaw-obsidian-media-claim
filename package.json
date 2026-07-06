@@ -1,7 +1,7 @@
 {
   "name": "obsidian-media-claim",
   "version": "0.1.11",
-  "description": "OpenClaw plugin that intercepts media-only inbound messages before the LLM and stages readable attachments for obsidian-cli-plugins.",
+  "description": "Optional OpenClaw pre-model media guard for obsidian-cli-plugins that stages uploads without spending LLM tokens.",
   "homepage": "https://github.com/DXShelley/openclaw-obsidian-media-claim#readme",
   "repository": {
     "type": "git",
@@ -61,7 +61,7 @@
       "requires": [
         "Node.js >=22.19",
         "OpenClaw with reply_dispatch, inbound_claim, before_dispatch, before_agent_reply, and before_prompt_build typed hooks",
-        "obsidian-cli-plugins when stageAttachments is enabled; text-only Obsidian records work with the skill alone"
+        "obsidian-cli-plugins skill is required for Obsidian record workflows; this plugin is an optional pre-model media guard and staged-handoff helper"
       ]
     }
   },
