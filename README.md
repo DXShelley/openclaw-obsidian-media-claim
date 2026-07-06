@@ -233,6 +233,25 @@ openclaw plugins inspect obsidian-media-claim
 
 Restart or refresh the OpenClaw gateway after installing or updating runtime plugins.
 
+## Website
+
+The project website follows the `obsidian-image-manager` style as a single project page:
+
+- `/`: OpenClaw plugin page for media-only interception, staging, prompt injection, and safety boundaries.
+- `?lang=en`: English content; Chinese is the default.
+- `#links`: friendly links to the image plugin page and Obsidian skill page, which are maintained in their own repositories.
+- `#support`: project support section with WeChat Pay, WeChat reward, and Alipay QR images.
+
+Build locally:
+
+```bash
+cd website
+npm install
+npm run build
+```
+
+GitHub Pages is deployed by `.github/workflows/pages.yml` from the `dev` branch when `website/**` changes, and from stable `vX.Y.Z` tags during releases. The npm publish workflow also builds `website/` before publishing, so release tags verify the pages before the package is published.
+
 ## Publish
 
 Prepare a package:

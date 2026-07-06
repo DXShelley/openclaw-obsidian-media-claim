@@ -2,7 +2,7 @@
   "id": "obsidian-media-claim",
   "name": "Obsidian Media Claim",
   "description": "Optional pre-model media guard for obsidian-cli-plugins: claim media-only uploads before the LLM, stage readable attachments, and avoid unnecessary token spend.",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "capabilities": [
     "hooks"
   ],

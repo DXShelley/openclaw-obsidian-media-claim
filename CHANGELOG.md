@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.1.15 - 2026-07-06
+
+- Add the static project website and GitHub Pages deployment workflow.
+- Verify website build compatibility during npm publishing.
+- Extend release validation coverage for website metadata and Pages workflow configuration.
+
 ## 0.1.14 - 2026-07-06
 
 - Update the npm publish workflow to install a current npm CLI before Trusted Publishing, matching npm's OIDC publishing requirements.

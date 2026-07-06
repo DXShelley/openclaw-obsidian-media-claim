@@ -68,6 +68,10 @@ jobs:
       - name: Verify
         run: npm run verify
 
+      - name: Build website
+        working-directory: website
+        run: npm ci && npm run build
+
       - name: Check published version
         id: published
         shell: bash

@@ -1,6 +1,6 @@
 {
   "name": "obsidian-media-claim",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "Optional OpenClaw pre-model media guard for obsidian-cli-plugins that stages uploads without spending LLM tokens.",
   "homepage": "https://github.com/DXShelley/openclaw-obsidian-media-claim#readme",
   "repository": {
