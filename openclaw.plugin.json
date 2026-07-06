@@ -2,13 +2,16 @@
   "id": "obsidian-media-claim",
   "name": "Obsidian Media Claim",
   "description": "Intercept media-only inbound messages before the LLM and stage readable attachments for obsidian-cli-plugins.",
-  "version": "0.1.3",
+  "version": "0.1.11",
   "capabilities": [
     "hooks"
   ],
   "hooks": [
+    "reply_dispatch",
     "inbound_claim",
-    "before_dispatch"
+    "before_dispatch",
+    "before_agent_reply",
+    "before_prompt_build"
   ],
   "configSchema": {
     "type": "object",
@@ -32,6 +35,11 @@
         "type": "string",
         "description": "Absolute path to obsidian-cli-plugins/scripts/obsidian_workflows.py."
       },
+      "stagedAttachmentTtlHours": {
+        "type": "number",
+        "default": 48,
+        "description": "Prune staged attachments older than this many hours before saving newly uploaded media."
+      },
       "onlyChannels": {
         "type": "array",
         "items": {
@@ -46,17 +54,40 @@
         },
         "description": "Optional denylist of OpenClaw channel ids."
       },
-      "claimEmptyBodyMediaEvents": {
+      "replyDispatchGuard": {
         "type": "boolean",
         "default": true,
-        "description": "Claim empty-body dispatch events from media-capable channels as media-only messages."
+        "description": "Use reply_dispatch as the primary pre-model guard for media-only channel turns with full finalized context."
       },
-      "emptyBodyMediaChannels": {
-        "type": "array",
-        "items": {
-          "type": "string"
-        },
-        "description": "Channels where an empty before_dispatch body should be treated as a media-only event."
+      "beforeDispatchFallback": {
+        "type": "boolean",
+        "default": true,
+        "description": "Use before_dispatch as an early compatibility fallback for attachment-marker messages."
+      },
+      "agentReplyFallback": {
+        "type": "boolean",
+        "default": true,
+        "description": "Use before_agent_reply as a late compatibility guard to return a synthetic reply for media-only prompts not handled earlier."
+      },
+      "agentRunFallback": {
+        "type": "boolean",
+        "default": true,
+        "description": "Deprecated compatibility alias for agentReplyFallback=false."
+      },
+      "pendingMediaPromptInjection": {
+        "type": "boolean",
+        "default": true,
+        "description": "Inject staged media workflow guidance into later text turns that ask to record earlier videos/media/attachments."
+      },
+      "debugLogging": {
+        "type": "boolean",
+        "default": false,
+        "description": "Write detailed hook diagnostics to debugLogPath."
+      },
+      "debugLogPath": {
+        "type": "string",
+        "default": "/tmp/obsidian-media-claim-debug.jsonl",
+        "description": "Path for JSONL diagnostics. Can also be set with OBSIDIAN_MEDIA_CLAIM_DEBUG_LOG."
       }
     }
   }
