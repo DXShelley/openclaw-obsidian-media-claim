@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const pluginJson = JSON.parse(await readFile(new URL("../openclaw.plugin.json", import.meta.url), "utf8"));
+const npmPublishWorkflow = await readFile(new URL("../.github/workflows/npm-publish.yml", import.meta.url), "utf8");
 
 assert.equal(pluginJson.version, packageJson.version);
 assert.deepEqual(pluginJson.hooks, [
@@ -19,5 +20,11 @@ assert.match(pluginJson.configSchema.properties.python.description, /absolute pa
 assert.equal(pluginJson.configSchema.properties.pendingMediaPromptInjection.default, true);
 assert.match(pluginJson.configSchema.properties.pendingMediaPromptInjection.description, /trusted runtime conversation metadata/i);
 assert.equal(pluginJson.configSchema.properties.debugLogging.default, false);
+assert.match(npmPublishWorkflow, /name:\s*Publish npm package/);
+assert.match(npmPublishWorkflow, /tags:\s*\n\s+- "v\*\.\*\.\*"/);
+assert.match(npmPublishWorkflow, /node-version:\s*"22\.19\.0"/);
+assert.match(npmPublishWorkflow, /npm run verify/);
+assert.match(npmPublishWorkflow, /secrets\.NPM_TOKEN/);
+assert.match(npmPublishWorkflow, /npm publish --access public --registry https:\/\/registry\.npmjs\.org\/ --provenance/);
 
 console.log("json validation passed");

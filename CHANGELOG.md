@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add a GitHub Actions npm publish workflow for stable `vX.Y.Z` tags, with version matching, verification, duplicate-version skip, and npm provenance.
+
 ## 0.1.12 - 2026-07-06
 
 - Scope pending-media prompt injection to trusted runtime batch keys, skip injection when the key cannot be built, and escape staged attachment ids and labels before adding them to model context.

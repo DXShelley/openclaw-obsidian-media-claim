@@ -241,6 +241,27 @@ Prepare a package:
 npm run pack:dry-run
 ```
 
+### Automated npm publish
+
+GitHub Actions publishes stable semver tags automatically. Configure the repository secret first:
+
+```text
+NPM_TOKEN=<npm automation token with publish permission>
+```
+
+Then bump the patch version, commit it, create a matching tag, and push both the branch and tag:
+
+```bash
+npm version patch --no-git-tag-version
+git add package.json package-lock.json index.js openclaw.plugin.json CHANGELOG.md
+git commit -m "chore: release v$(node -p "require('./package.json').version")"
+git tag "v$(node -p "require('./package.json').version")"
+git push origin dev
+git push origin "v$(node -p "require('./package.json').version")"
+```
+
+The workflow accepts tags like `v0.1.12`, requires the tag to match `package.json#version`, runs `npm ci` and `npm run verify`, skips publishing if that exact version already exists on npm, and publishes with npm provenance.
+
 Publish to npm:
 
 ```bash
