@@ -62,9 +62,55 @@ a {
 }
 
 .shell {
-  width: min(1160px, calc(100% - 32px));
+  width: min(1320px, calc(100% - 32px));
   margin: 0 auto;
   padding: 22px 0 32px;
+}
+
+main {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+main > .hero,
+main > .section {
+  grid-column: 2;
+}
+
+.side-nav {
+  position: sticky;
+  top: 50vh;
+  z-index: 20;
+  display: grid;
+  grid-column: 1;
+  grid-row: 1 / span 99;
+  gap: 8px;
+  align-self: start;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(23, 32, 36, 0.8);
+  box-shadow: var(--shadow);
+  transform: translateY(-50%);
+  backdrop-filter: blur(14px);
+}
+
+.side-nav a {
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.25;
+}
+
+.side-nav a:hover {
+  color: var(--text);
+  border-color: var(--line);
+  background: rgba(238, 242, 240, 0.06);
 }
 
 .topbar {
@@ -212,6 +258,7 @@ h3 {
   font-weight: 700;
   line-height: 1.08;
   overflow-wrap: break-word;
+  text-wrap: balance;
 }
 
 h1 {
@@ -229,12 +276,21 @@ h3 {
   font-size: 1.18rem;
 }
 
+.semantic-phrase {
+  display: inline-block;
+}
+
+.semantic-soft-phrase {
+  display: inline;
+}
+
 .lead,
 .card p,
 .step p,
 .install p,
 .support p,
 .link-card p,
+.link-optionality,
 .hero-panel p {
   color: var(--muted);
   line-height: 1.72;
@@ -272,7 +328,8 @@ h3 {
 .card,
 .step,
 pre,
-.support-card {
+.support-card,
+.link-card {
   border: 1px solid var(--line);
   border-radius: 18px;
   background: var(--surface);
@@ -391,10 +448,38 @@ pre {
 }
 
 .link-card {
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  background: var(--surface);
-  backdrop-filter: blur(12px);
+  position: relative;
+  min-height: 100%;
+}
+
+.link-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(232, 239, 235, 0.26);
+  background: var(--surface-strong);
+}
+
+.link-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.link-card-top span {
+  flex-shrink: 0;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(238, 242, 240, 0.08);
+  color: var(--text);
+  font-size: 0.78rem;
+}
+
+.link-optionality {
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(238, 242, 240, 0.065);
+  color: var(--text);
+  line-height: 1.55;
 }
 
 .qr-frame {
@@ -414,6 +499,14 @@ pre {
 }
 
 @media (max-width: 980px) {
+  main {
+    display: block;
+  }
+
+  .side-nav {
+    display: none;
+  }
+
   .hero,
   .install,
   .split-grid,
@@ -447,6 +540,10 @@ pre {
   .support-grid,
   .link-grid {
     grid-template-columns: 1fr;
+  }
+
+  .link-card-top {
+    flex-direction: column;
   }
 
   h1 {

@@ -36,7 +36,14 @@ interface SiteConfig {
   readonly cards: readonly { readonly title: string; readonly body: string; readonly meta: string }[];
   readonly workflow: readonly { readonly step: string; readonly title: string; readonly body: string }[];
   readonly commands: readonly string[];
-  readonly links: readonly { readonly title: string; readonly body: string; readonly href: string; readonly meta: string }[];
+  readonly links: readonly {
+    readonly title: string;
+    readonly body: string;
+    readonly href: string;
+    readonly meta: string;
+    readonly relation: string;
+    readonly optionality: string;
+  }[];
   readonly support: readonly { readonly title: string; readonly body: string; readonly image: string; readonly alt: string }[];
 }
 
@@ -68,44 +75,44 @@ const configs: Record<SiteLocale, SiteConfig> = {
       items: [
         { label: '核心能力', href: '#capabilities' },
         { label: '处理流程', href: '#workflow' },
-        { label: '安装验证', href: '#install' },
-        { label: '友情链接', href: '#links' },
+        { label: '安装与验证', href: '#install' },
+        { label: '相关项目', href: '#links' },
         { label: '支持项目', href: '#support' }
       ]
     },
     language: { label: '语言', zh: '中文', en: 'EN' },
     hero: {
-      kicker: 'OpenClaw 媒体暂存插件',
-      title: '只上传媒体，不惊动模型，把 token 省下来。',
+      kicker: 'OpenClaw 媒体守卫插件',
+      title: '只上传媒体，|不惊动模型，|把 token 省下来。',
       subtitle:
         'Obsidian Media Claim 的边界很明确：媒体-only 消息只保存文件、暂存引用、回复确认，不触发大模型；真正的文字意图出现后，再把安全 selector 交给后续记录流程。',
       primary: { label: '查看省 token 机制', href: '#capabilities' },
-      secondary: { label: '安装验证', href: '#install' },
+      secondary: { label: '安装与验证', href: '#install' },
       panel: {
         kicker: '模型前守卫',
-        title: '媒体-only 事件在 reply_dispatch 前后被 claim，LLM 不参与、不读图、不花 token。',
-        body: '插件只做 claim、stage、inject，不分析媒体内容，也不直接创建 Obsidian 笔记。记录落库由独立的 obsidian-cli-plugins 技能负责。',
-        chips: ['省 token', '不触发 LLM', 'media-only guard', 'staged attachments']
+        title: '媒体-only 事件在 reply_dispatch 前后被 claim，|LLM 不参与、不读图、不花 token。',
+        body: '插件只做 claim、stage、inject，|不分析媒体内容，也不直接创建 Obsidian 笔记。|记录落库由独立的 obsidian-cli-plugins 技能负责。',
+        chips: ['省 token', '不触发 LLM', 'media-only|guard', 'staged|attachments']
       }
     },
     sections: {
-      capabilities: { eyebrow: '核心能力', title: '插件只做本项目该做的事：守住模型入口，暂存可追踪媒体。' },
-      workflow: { eyebrow: '处理流程', title: '省 token 的关键，是把媒体上传和文字意图拆开处理。' },
-      install: { eyebrow: '安装验证', title: '插件配置重点是 Python、hook 权限和调试日志。', body: 'OpenClaw Gateway 的 PATH 可能不同于交互式 shell，建议配置绝对 Python 3.10+ 路径。' },
-      links: { eyebrow: '友情链接', title: '相关项目各在自己的仓库维护 Pages，本页只展示 Obsidian Media Claim。' },
-      support: { eyebrow: '支持项目', title: '如果这个插件帮你省掉了 token 和媒体整理时间，可以扫码支持维护。', body: '赞助用于测试真实渠道、维护文档、跟进 OpenClaw typed hooks 与 Obsidian 工作流变化。' }
+      capabilities: { eyebrow: '核心能力', title: '只守住模型入口，|只暂存可追踪媒体。' },
+      workflow: { eyebrow: '处理流程', title: '省 token 的关键，|是把媒体上传|和文字意图|拆开处理。' },
+      install: { eyebrow: '安装与验证', title: '配置 Python、hook 权限|和调试日志。', body: 'OpenClaw Gateway 的 PATH 可能不同于交互式 shell，|建议配置绝对 Python 3.10+ 路径。' },
+      links: { eyebrow: '相关项目', title: '本插件负责 OpenClaw 媒体暂存，|另外两个项目按需接入。' },
+      support: { eyebrow: '支持项目', title: '如果这个插件帮你省掉了 token 和媒体整理时间，|可以扫码支持维护。', body: '赞助用于测试真实渠道、维护文档，|跟进 OpenClaw typed hooks 与 Obsidian 工作流变化。' }
     },
     cards: [
-      { meta: 'Token', title: '媒体-only 上传不走 LLM', body: '图片、视频、音频或文件先被保存并暂存，不让模型为了“看见一个附件”消耗上下文和推理成本。' },
-      { meta: 'Hook', title: 'reply_dispatch 是主路径', body: '在默认 LLM reply path 前 claim 媒体-only 事件，直接发送“收到媒体，已保存。”这类确认回复。' },
-      { meta: 'Handoff', title: '后续文本才进入 Agent', body: '用户后续说“把刚才的视频记录一下”时，插件只注入 staged selector，让 Agent 使用现成附件。' },
-      { meta: 'Boundary', title: '不分析媒体内容，不创建笔记', body: '插件只负责媒体守卫和暂存；是否记录、记录到哪里、如何同步，都交给技能。' }
+      { meta: 'Token', title: '媒体-only 上传|不走 LLM', body: '图片、视频、音频或文件先被保存并暂存，|不让模型为了“看见一个附件”消耗上下文和推理成本。' },
+      { meta: 'Hook', title: 'reply_dispatch|是主路径', body: '在默认 LLM reply path 前 claim 媒体-only 事件，|直接发送“收到媒体，已保存。”这类确认回复。' },
+      { meta: 'Handoff', title: '后续文本|才进入 Agent', body: '用户后续说“把刚才的视频记录一下”时，|插件只注入 staged selector，让 Agent 使用现成附件。' },
+      { meta: 'Boundary', title: '不分析媒体内容，|不创建笔记', body: '插件只负责媒体守卫和暂存；|是否记录、记录到哪里、如何同步，都交给技能。' }
     ],
     workflow: [
-      { step: '01', title: '识别纯媒体事件', body: '过滤含用户文本的消息，只 claim 没有真实文字意图的媒体上传。' },
-      { step: '02', title: '直接保存和暂存', body: '调用 attachment-stage 保存本地路径，回复确认，不启动 LLM。' },
-      { step: '03', title: '等待文字意图', body: '后续文字指令出现时，才进入 prompt build 和 Agent 工作流。' },
-      { step: '04', title: '只注入安全 selector', body: '注入 JSON escaped selector、ids 和 labels，不把媒体内容暴露给模型。' }
+      { step: '01', title: '识别纯媒体事件', body: '过滤含用户文本的消息，|只 claim 没有真实文字意图的媒体上传。' },
+      { step: '02', title: '直接保存和暂存', body: '调用 attachment-stage 保存本地路径，|回复确认，不启动 LLM。' },
+      { step: '03', title: '等待文字意图', body: '后续文字指令出现时，|才进入 prompt build 和 Agent 工作流。' },
+      { step: '04', title: '只注入安全 selector', body: '注入 JSON escaped selector、ids 和 labels，|不把媒体内容暴露给模型。' }
     ],
     commands: [
       'openclaw plugins install obsidian-media-claim --force',
@@ -113,9 +120,30 @@ const configs: Record<SiteLocale, SiteConfig> = {
       'tail -f /tmp/obsidian-media-claim-debug.jsonl'
     ],
     links: [
-      { meta: 'Image Plugin', title: 'Note Image Manager', body: 'Obsidian 图片导入、压缩、转换、画廊和恢复事务插件。', href: imageManagerUrlZh },
-      { meta: 'OpenClaw Plugin', title: 'Obsidian Media Claim', body: '当前页面。媒体-only 上传的模型前守卫，核心价值是省 token。', href: '#top' },
-      { meta: 'Obsidian Skill', title: 'obsidian-cli-plugins', body: '灵感记录、项目孵化、任务管理、日程管理和附件记录的少量命令入口。', href: skillUrlZh }
+      {
+        meta: 'Obsidian 插件',
+        title: 'Note Image Manager',
+        relation: '可选配套',
+        optionality: '用于管理已经进入 Obsidian vault 的图片；|不使用图片管理能力可不安装。',
+        body: '负责图片导入、命名、压缩转换、画廊和恢复事务，|和本插件互不替代。',
+        href: imageManagerUrlZh
+      },
+      {
+        meta: '当前项目',
+        title: 'Obsidian Media Claim',
+        relation: '当前插件',
+        optionality: '仅在 OpenClaw 纯媒体上传省 token 场景中需要。',
+        body: '负责拦截纯媒体消息、保存并暂存附件；|不分析媒体内容，不写 Obsidian 笔记。',
+        href: '#top'
+      },
+      {
+        meta: 'Agent 技能',
+        title: 'obsidian-cli-plugins',
+        relation: '可选后续',
+        optionality: '需要把 staged attachments 和文字意图|写入 Obsidian 时推荐搭配。',
+        body: '负责记录、项目、任务、日程和附件落库；|接收本插件暂存的附件引用。',
+        href: skillUrlZh
+      }
     ],
     support: supportZh
   },
@@ -173,9 +201,30 @@ const configs: Record<SiteLocale, SiteConfig> = {
       'tail -f /tmp/obsidian-media-claim-debug.jsonl'
     ],
     links: [
-      { meta: 'Image Plugin', title: 'Note Image Manager', body: 'Obsidian image import, compression, conversion, galleries, and recovery transactions.', href: imageManagerUrlEn },
-      { meta: 'OpenClaw Plugin', title: 'Obsidian Media Claim', body: 'This page. A pre-model guard for media-only uploads whose main value is saving tokens.', href: '#top' },
-      { meta: 'Obsidian Skill', title: 'obsidian-cli-plugins', body: 'A small command set for inspiration capture, project incubation, tasks, schedules, and attachments.', href: skillUrlEn }
+      {
+        meta: 'Obsidian Plugin',
+        title: 'Note Image Manager',
+        relation: 'Optional companion',
+        optionality: 'Use it to manage images already inside an Obsidian vault.',
+        body: 'Handles image import, naming, compression, conversion, galleries, and recovery transactions. It does not replace this plugin.',
+        href: imageManagerUrlEn
+      },
+      {
+        meta: 'Current Project',
+        title: 'Obsidian Media Claim',
+        relation: 'OpenClaw component',
+        optionality: 'Only needed for token-saving media-only uploads in OpenClaw.',
+        body: 'Intercepts pure media messages, saves and stages attachments, and does not analyze media or write Obsidian notes.',
+        href: '#top'
+      },
+      {
+        meta: 'Agent Skill',
+        title: 'obsidian-cli-plugins',
+        relation: 'Optional downstream',
+        optionality: 'Recommended when staged attachments and text intent should be written into Obsidian.',
+        body: 'Writes records, projects, tasks, schedules, and attachments, including staged references from this plugin.',
+        href: skillUrlEn
+      }
     ],
     support: supportEn
   }
